@@ -7,64 +7,146 @@
 **Summary:**
 Service-Buddy is an AI-powered agent designed to help Australians navigate government services during stressful life events (e.g., job loss, birth of a child, natural disaster). The agent provides service recommendations, eligibility explanations, checklists, simulated forms, reminders, and escalation to human help. The MVP focuses on three life events and is tailored for South Australia, but works nationally with federal services. Channels include web chat, voice playback, and SMS reminders.
 
-**Repository Size:** Small (single PRD file at root; no source code or build scripts yet).
+**Repository Size:** Small to medium (PRD + Next.js application).
 
-**Project Type:** Early-stage product requirements/design documentation. No implementation code present.
+**Project Type:** Frontend-focused Next.js application with lightweight backend API routes
 
-**Languages/Frameworks:** Not yet implemented. Future plans suggest web/mobile frontend, backend API gateway, and data layer (see PRD for architecture).
+**Languages/Frameworks:** Next.js 14, React 18, TypeScript, Tailwind CSS
 
-**Target Runtime:** Not applicable yet; future plans may involve Python, JavaScript/TypeScript, web frameworks, and cloud APIs.
+**Target Runtime:** Node.js 18+, deployed to web (Vercel/Netlify recommended)
 
 ---
 
 ## Build, Test, and Validation Instructions
 
-**Current State:**
-- No build, bootstrap, test, run, or lint scripts are present.
-- No source code, configuration, or CI/CD pipelines exist yet.
-- No environment setup required at this stage.
-- No validation steps or automated checks are available.
+**Prerequisites:**
+- Node.js 18+ (tested with 18.17.1)
+- npm or yarn package manager
 
-**Instructions:**
-- If code is added, always create and document build, test, and validation steps in the README.md and/or relevant scripts.
-- If you add CI/CD workflows, document their triggers and validation steps here and in workflow files.
-- If you add dependencies, document installation and setup steps.
-- Always run `npm install` (for Node.js), `pip install -r requirements.txt` (for Python), or equivalent before building or testing, if such files exist.
-- If you encounter build or test errors, document the error and the workaround in this file.
+**Setup Steps:**
+1. **Always navigate to the service-buddy-ui directory first**:
+   ```powershell
+   Set-Location "service-buddy-ui"
+   ```
+
+2. **Install dependencies** (required before any other operations):
+   ```powershell
+   npm install
+   ```
+
+3. **Environment setup** (optional for basic functionality):
+   - Copy `.env.local` for environment variables
+   - Add `OPENAI_API_KEY=your_key_here` for enhanced AI responses (optional)
+
+**Development Commands:**
+- **Start dev server**: `npm run dev` (runs on http://localhost:3000)
+- **Build for production**: `npm run build`
+- **Start production**: `npm start`
+- **Lint code**: `npm run lint`
+
+**Validated Working Commands:**
+1. `cd service-buddy-ui` → `npm install` → `npm run dev` ✅
+2. Dev server starts successfully on port 3000 ✅
+3. TypeScript compilation works with some warnings (expected) ✅
+
+**Known Issues & Workarounds:**
+- **Node version warning**: TypeScript ESLint requires Node 18.18+, but 18.17.1 works with warnings
+- **PowerShell navigation**: Use `Set-Location` instead of `cd` for directory changes
+- **TSConfig auto-generation**: Next.js automatically creates tsconfig.json on first run
 
 ---
 
 ## Project Layout and Architecture
 
 **Current Layout:**
-- Root: `Product Requirements Document.md` (PRD)
-- `.github/`: For Copilot and future workflow/configuration files
+```
+Service-Buddy/
+├── Product Requirements Document.md (PRD)
+├── .github/copilot-instructions.md
+└── service-buddy-ui/ (Next.js App)
+    ├── app/
+    │   ├── api/chat/route.ts (Lightweight backend)
+    │   ├── layout.tsx (Root layout)
+    │   └── page.tsx (Home page)
+    ├── components/
+    │   └── ChatInterface.tsx (Main chat component)
+    ├── styles/
+    │   └── globals.css (Tailwind + custom styles)
+    ├── package.json
+    ├── next.config.js
+    ├── tailwind.config.js
+    ├── .env.local (environment variables)
+    └── README.md
+```
 
-**Key Facts:**
-- The PRD contains all product requirements, architecture, API design, data model, UX, delivery plan, and validation metrics.
-- No source code, scripts, or configuration files are present yet.
-- No README.md, CONTRIBUTING.md, or other documentation files exist.
-- No build, lint, or test configuration files exist.
-- No GitHub Actions or CI/CD workflows are present.
+**Key Architecture Facts:**
+- **Frontend**: Next.js 14 with App Router, React 18, TypeScript
+- **Styling**: Tailwind CSS with custom gradient themes
+- **Backend**: Lightweight API routes in `/app/api/`
+- **State Management**: React hooks (useState, useRef, useEffect)
+- **AI Integration**: Optional OpenAI API via `/api/chat` endpoint
+
+**API Endpoints:**
+- `POST /api/chat`: Processes user messages, returns service recommendations
+- Mock data for 3 life events: job_loss, birth, disaster
+- Intent detection via keyword matching
+- Fallback to local processing if API fails
+
+**Configuration Files:**
+- `next.config.js`: Next.js configuration
+- `tailwind.config.js`: Custom gradients and animations
+- `postcss.config.js`: PostCSS for Tailwind
+- `tsconfig.json`: Auto-generated TypeScript config
+
+**Development Workflow:**
+1. Always work in `/service-buddy-ui/` directory
+2. Install dependencies first: `npm install`
+3. Start dev server: `npm run dev`
+4. App runs on http://localhost:3000
+5. Hot reload enabled for development
 
 **Instructions for Coding Agent:**
-- Trust these instructions and the PRD for all high-level context.
-- Only perform additional searches if these instructions or the PRD are incomplete or found to be in error.
-- When code is added, update this file with build, test, and validation steps, and document any issues or workarounds.
-- If implementing features, use the architecture and API design described in the PRD as your guide.
-- If adding new files, prefer descriptive names and document their purpose in the README.md and here.
+- **Always navigate to service-buddy-ui directory first** before running any npm commands
+- Trust these build instructions - they have been validated and work
+- Use the PRD for feature requirements and API design guidance
+- The chat interface is fully functional with mock data
+- API route handles intent detection and service retrieval
+- Only search for additional context if these instructions are incomplete
 
 ---
 
-## File Inventory (Root)
-- `Product Requirements Document.md`: Comprehensive requirements, architecture, and design for Service-Buddy.
+## File Inventory
 
-## File Inventory (`.github/`)
-- `copilot-instructions.md`: This onboarding file for Copilot coding agent.
+**Root Directory:**
+- `Product Requirements Document.md`: Complete requirements and architecture
+
+**service-buddy-ui/ (Next.js App):**
+- `package.json`: Dependencies and scripts
+- `README.md`: Setup and usage instructions
+- `app/page.tsx`: Main application page
+- `app/layout.tsx`: Root layout component
+- `app/api/chat/route.ts`: Chat API endpoint
+- `components/ChatInterface.tsx`: Main chat component (270+ lines)
+- `styles/globals.css`: Tailwind CSS with custom styles
+- Configuration: `next.config.js`, `tailwind.config.js`, `postcss.config.js`
 
 ---
 
 ## Final Notes
-- This repository is currently documentation-only. Implementation code, build/test scripts, and configuration files should be added as the project progresses.
-- Always update this file and the README.md with new build, test, and validation instructions as the codebase evolves.
-- If you encounter missing or ambiguous information, refer to the PRD first, then perform targeted searches only as needed.
+
+**Working Setup:**
+- The Next.js application is fully functional and tested
+- Development server runs successfully on http://localhost:3000
+- Chat interface works with mock data for 3 life events
+- Responsive design with gradient theme as requested
+- TypeScript compilation works with minor warnings (expected)
+
+**Next Development Steps:**
+- Add more sophisticated AI integration (OpenAI API)
+- Implement checklist generation functionality
+- Add SMS/notification features
+- Integrate with real government service APIs
+- Add accessibility features (WCAG 2.2 AA compliance)
+
+**Critical Reminder:**
+Always run commands from the `service-buddy-ui/` directory, not the root!

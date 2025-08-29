@@ -134,15 +134,13 @@ Accessibility commitments (MVP): WCAG 2.2 AA, keyboard/screen‑reader support, 
 
 ```
 Client (Web/Mobile)
-  ├─ Chat UI + Explainability panel + Checklist view
+  ├─ Chat UI + Explainability panel - Include logs of process + Checklist view
   ├─ TTS player, Large-text toggle, High-contrast mode
   └─ SMS opt-in
 
 Backend (API Gateway)
   ├─ Orchestrator (LLM + policy guardrails)
-  ├─ Retrieval Service (vector + keyword index over datasets)
-  ├─ Eligibility & Explainability (rules extraction, citation pack)
-  ├─ Checklist Service (templater)
+  ├─ A serverless proxy - tiny backend function between OpenAI and Frontend
   ├─ Localization Service (i18n + glossary)
   ├─ Notifications (SMS/Email)
   └─ Telemetry & Audit (privacy-aware)
