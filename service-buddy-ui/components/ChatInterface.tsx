@@ -410,26 +410,26 @@ What situation can I help you with?`
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full">
       {/* Chat Area */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
+      <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex flex-col overflow-hidden">
         {/* Chat Header with Settings */}
-        <div className="border-b border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
+        <div className="border-b border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
               mode === 'basic' 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'bg-purple-100 text-purple-700'
+                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' 
+                : 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
             }`}>
               {mode === 'basic' ? '🆓 Basic Mode' : '🚀 Advanced Mode'}
             </div>
             {mode === 'basic' && usageInfo && (
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 {usageInfo.remaining}/{usageInfo.limit} AI responses left today
               </div>
             )}
           </div>
           <button
             onClick={() => setShowSettings(true)}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             ⚙️ Settings
           </button>
@@ -454,7 +454,7 @@ What situation can I help you with?`
                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-typing"></span>
                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-typing"></span>
               </div>
-              <span className="ml-3 text-gray-600">Service-Buddy is thinking...</span>
+              <span className="ml-3 text-gray-600 dark:text-gray-400">Service-Buddy is thinking...</span>
             </div>
           )}
           
@@ -462,9 +462,9 @@ What situation can I help you with?`
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-200 p-5 bg-gray-50">
+        <div className="border-t border-gray-200 dark:border-gray-700 p-5 bg-gray-50 dark:bg-gray-900">
           {/* Dynamic placeholder text above input */}
-          <div className="mb-3 text-sm text-gray-600">
+          <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
             <TypewriterText 
               staticText="Tell me about your situation... (e.g., '"
               phrases={examplePhrases}
@@ -472,7 +472,7 @@ What situation can I help you with?`
               deleteSpeed={100}
               pauseDuration={2500}
             />
-            <span className="text-gray-600">')</span>
+            <span className="text-gray-600 dark:text-gray-400">')</span>
           </div>
           
           <div className="flex gap-4 items-end">
@@ -482,12 +482,12 @@ What situation can I help you with?`
               onKeyPress={handleKeyPress}
               placeholder="Type your message here..."
               rows={3}
-              className="flex-1 border-2 border-gray-300 rounded-xl p-3 text-base resize-none focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-colors"
+              className="flex-1 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-3 text-base resize-none focus:border-blue-500 dark:focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-purple-200 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping}
-              className="bg-gradient-message text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200 h-fit"
+              className="bg-gradient-message dark:bg-gradient-send-dark text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 hover:shadow-lg disabled:opacity-60 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200 h-fit"
             >
               Send
             </button>
@@ -496,8 +496,8 @@ What situation can I help you with?`
       </div>
 
       {/* Response Panel */}
-      <div className="bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
-        <div className="bg-gradient-message text-white p-4 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex flex-col overflow-hidden">
+        <div className="bg-gradient-message dark:bg-gradient-chat-dark text-white p-4 text-center">
           <h3 className="text-lg font-semibold">Service Information</h3>
         </div>
         
@@ -505,16 +505,16 @@ What situation can I help you with?`
           {selectedServices.length > 0 ? (
             selectedServices.map((service) => (
               <div key={service.id} className="service-card">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">{service.title}</h4>
-                <p className="text-sm text-gray-600 italic mb-2">{service.agency}</p>
-                <p className="text-gray-700 mb-3 leading-relaxed">{service.description}</p>
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">{service.title}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-2">{service.agency}</p>
+                <p className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">{service.description}</p>
                 
-                <div className="bg-blue-50 rounded-lg p-3 mb-3">
-                  <h5 className="text-blue-700 font-medium mb-2 text-sm">Key Eligibility Requirements:</h5>
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 mb-3">
+                  <h5 className="text-blue-700 dark:text-blue-300 font-medium mb-2 text-sm">Key Eligibility Requirements:</h5>
                   <ul className="space-y-1">
                     {service.eligibility.map((req, index) => (
-                      <li key={index} className="text-gray-600 text-sm flex items-start">
-                        <span className="text-blue-500 mr-2">•</span>
+                      <li key={index} className="text-gray-600 dark:text-gray-300 text-sm flex items-start">
+                        <span className="text-blue-500 dark:text-blue-400 mr-2">•</span>
                         {req}
                       </li>
                     ))}
@@ -522,14 +522,14 @@ What situation can I help you with?`
                 </div>
                 
                 <div className="text-sm space-y-1">
-                  <p><strong>Phone:</strong> {service.phone}</p>
-                  <p>
+                  <p className="text-gray-800 dark:text-white"><strong>Phone:</strong> {service.phone}</p>
+                  <p className="text-gray-800 dark:text-white">
                     <strong>Apply:</strong>{' '}
                     <a 
                       href={service.applyUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
                     >
                       Visit official page
                     </a>
@@ -538,28 +538,28 @@ What situation can I help you with?`
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 py-10">
+            <div className="text-center text-gray-500 dark:text-gray-400 py-10">
               <p className="leading-relaxed">Your personalized service recommendations and explanations will appear here.</p>
               
               {/* Example suggestions */}
               <div className="mt-8 space-y-3">
-                <p className="font-medium text-gray-700 text-sm">Try these examples:</p>
+                <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">Try these examples:</p>
                 <div className="space-y-2">
                   <button
                     onClick={() => fillAndSend('I lost my job and need help with payments')}
-                    className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
+                    className="w-full p-3 text-left bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm transition-colors text-gray-800 dark:text-gray-200"
                   >
                     "I lost my job and need help with payments"
                   </button>
                   <button
                     onClick={() => fillAndSend('We just had a baby')}
-                    className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
+                    className="w-full p-3 text-left bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm transition-colors text-gray-800 dark:text-gray-200"
                   >
                     "We just had a baby"
                   </button>
                   <button
                     onClick={() => fillAndSend('I lost my home due to natural disaster')}
-                    className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
+                    className="w-full p-3 text-left bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm transition-colors text-gray-800 dark:text-gray-200"
                   >
                     "I lost my home due to natural disaster"
                   </button>

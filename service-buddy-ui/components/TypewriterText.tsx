@@ -29,9 +29,9 @@ export default function TypewriterText({
   return (
     <span className={className}>
       {staticText}
-      <span className="text-blue-600 font-medium">
+      <span className="text-blue-600 dark:text-gray-300 font-medium">
         {dynamicText}
-        <span className="animate-pulse text-blue-400">|</span>
+        <span className="animate-pulse text-blue-400 dark:text-gray-400">|</span>
       </span>
     </span>
   )

@@ -5,13 +5,23 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       backgroundImage: {
+        // Light mode gradients (current)
         'gradient-main': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 75%, #f5576c 100%)',
         'gradient-panel': 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
         'gradient-message': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         'gradient-warm': 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)',
+        
+        // Dark mode gradients
+        'gradient-main-dark': 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 15%, #581c87 35%, #be185d 60%, #dc2626 80%, #ea580c 100%)',
+        'gradient-panel-dark': 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+        'gradient-message-dark': 'linear-gradient(135deg, #4338ca 0%, #7c3aed 100%)',
+        'gradient-header-dark': 'linear-gradient(135deg, #581c87 0%, #be185d 50%, #dc2626 100%)',
+        'gradient-send-dark': 'linear-gradient(135deg, #4b5563 0%, #6b7280 50%, #9ca3af 100%)',
+        'gradient-chat-dark': 'linear-gradient(135deg, #374151 0%, #4b5563 100%)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in',

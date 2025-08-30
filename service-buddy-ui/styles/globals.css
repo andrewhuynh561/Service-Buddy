@@ -8,13 +8,32 @@
   }
   
   body {
-    @apply bg-gradient-main min-h-screen text-gray-800;
+    @apply min-h-screen;
+    /* Light mode - your current beautiful gradient */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 75%, #f5576c 100%);
+    background-attachment: fixed;
+    color: #1f2937;
+    transition: all 0.3s ease;
+  }
+  
+  .dark body {
+    /* Dark mode - Lovable-inspired gradient with more accurate colors */
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 15%, #581c87 35%, #be185d 60%, #dc2626 80%, #ea580c 100%);
+    background-attachment: fixed;
+    color: #ffffff;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20;
+    @apply backdrop-blur-lg rounded-2xl shadow-xl border;
+    /* Light mode */
+    @apply bg-white/20 border-white/20;
+  }
+  
+  .dark .glass-panel {
+    /* Dark mode */
+    @apply bg-gray-800/30 border-gray-700/30;
   }
   
   .message-bubble {
@@ -22,15 +41,47 @@
   }
   
   .bot-message {
-    @apply bg-gradient-panel text-gray-800 rounded-tr-2xl rounded-br-2xl rounded-bl-lg rounded-tl-sm;
+    @apply rounded-tr-2xl rounded-br-2xl rounded-bl-lg rounded-tl-sm;
+    /* Light mode */
+    @apply bg-gradient-panel text-gray-800;
+  }
+  
+  .dark .bot-message {
+    /* Dark mode */
+    @apply bg-gradient-panel-dark text-white;
   }
   
   .user-message {
-    @apply bg-gradient-message text-white ml-auto rounded-tl-2xl rounded-bl-2xl rounded-tr-lg rounded-br-sm;
+    @apply ml-auto rounded-tl-2xl rounded-bl-2xl rounded-tr-lg rounded-br-sm text-white;
+    /* Light mode */
+    @apply bg-gradient-message;
+  }
+  
+  .dark .user-message {
+    /* Dark mode */
+    @apply bg-gradient-message-dark;
   }
   
   .service-card {
-    @apply bg-gradient-to-br from-white to-blue-50 rounded-xl p-4 mb-4 border-l-4 border-blue-500 shadow-sm;
+    @apply rounded-xl p-4 mb-4 border-l-4 shadow-sm;
+    /* Light mode */
+    @apply bg-gradient-to-br from-white to-blue-50 border-blue-500 text-gray-800;
+  }
+  
+  .dark .service-card {
+    /* Dark mode */
+    @apply bg-gradient-to-br from-gray-800 to-gray-700 border-purple-400 text-white;
+  }
+  
+  .theme-toggle {
+    @apply fixed top-4 right-4 z-50 p-3 rounded-full backdrop-blur-lg shadow-lg border transition-all duration-300 hover:scale-110;
+    /* Light mode */
+    @apply bg-white/30 border-white/30 text-gray-800 hover:bg-white/40;
+  }
+  
+  .dark .theme-toggle {
+    /* Dark mode */
+    @apply bg-black/20 border-gray-600/30 text-white hover:bg-black/30;
   }
 }
 

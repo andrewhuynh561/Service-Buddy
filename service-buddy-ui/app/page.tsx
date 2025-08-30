@@ -2,7 +2,7 @@ import ChatInterface from '../components/ChatInterface'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-main">
+    <main className="min-h-screen">
       <div className="container mx-auto px-5 py-5 min-h-screen flex flex-col max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8 text-white">

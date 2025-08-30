@@ -1,4 +1,5 @@
 import '../styles/globals.css'
+import ThemeToggle from '../components/ThemeToggle'
 
 export const metadata = {
   title: 'Service-Buddy - Your AI Government Services Navigator',
@@ -15,7 +16,10 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body>{children}</body>
+      <body>
+        <ThemeToggle />
+        {children}
+      </body>
     </html>
   )
 }
