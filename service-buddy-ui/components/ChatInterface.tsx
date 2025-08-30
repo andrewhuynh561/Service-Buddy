@@ -416,7 +416,7 @@ What situation can I help you with?`
           <div className="flex items-center gap-3">
             <div className={`px-3 py-1 rounded-full text-xs font-medium ${
               mode === 'basic' 
-                ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' 
+                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' 
                 : 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
             }`}>
               {mode === 'basic' ? '🆓 Basic Mode' : '🚀 Advanced Mode'}

@@ -62,32 +62,32 @@ export default function SettingsModal({
         <div className="p-6 space-y-6">
           {/* Current Usage (Basic Mode) */}
           {currentMode === 'basic' && usageInfo && (
-            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Today's Usage</h3>
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Today's Usage</h3>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-700 dark:text-gray-300">AI-enhanced responses used:</span>
                 <span className="font-medium text-gray-900 dark:text-white">{usageInfo.used}/{usageInfo.limit}</span>
               </div>
-              <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2 mt-2">
+              <div className="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-2 mt-2">
                 <div 
-                  className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full" 
+                  className="bg-gray-600 dark:bg-gray-400 h-2 rounded-full" 
                   style={{ width: `${(usageInfo.used / usageInfo.limit) * 100}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                 {usageInfo.remaining} enhanced responses remaining today
               </p>
             </div>
           )}
 
           {/* Basic Mode */}
-          <div className={`border-2 rounded-xl p-6 ${currentMode === 'basic' ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'}`}>
+          <div className={`border-2 rounded-xl p-6 transition-all ${currentMode === 'basic' ? 'border-gray-500 bg-gray-100 dark:border-gray-400 dark:bg-gray-700' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800'}`}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                   🆓 Basic Mode
                   {currentMode === 'basic' && (
-                    <span className="bg-blue-500 dark:bg-blue-600 text-white text-xs px-2 py-1 rounded-full">Active</span>
+                    <span className="bg-gray-600 dark:bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Active</span>
                   )}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">Limited AI-enhanced responses using our API</p>
@@ -124,7 +124,7 @@ export default function SettingsModal({
           </div>
 
           {/* Advanced Mode */}
-          <div className={`border-2 rounded-xl p-6 ${currentMode === 'advanced' ? 'border-purple-500 bg-purple-50 dark:border-purple-400 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-600'}`}>
+          <div className={`border-2 rounded-xl p-6 transition-all ${currentMode === 'advanced' ? 'border-purple-500 bg-purple-50 dark:border-purple-400 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800'}`}>
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
