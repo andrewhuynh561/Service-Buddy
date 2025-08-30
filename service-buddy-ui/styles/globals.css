@@ -17,10 +17,13 @@
   }
   
   .dark body {
-    /* Dark mode - Lovable-inspired gradient with more accurate colors */
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 15%, #581c87 35%, #be185d 60%, #dc2626 80%, #ea580c 100%);
-    background-attachment: fixed;
-    color: #ffffff;
+  /* Dark mode - Lovable-style sunset: orange at bottom center, fading to light blue, dark blue, then dark */
+    background: radial-gradient(ellipse 110% 160% at 50% 100%, #fbbf24 0%, #ea580c 20%, #ff9a9e 25%, #fecfef 28%, #60a5fa 32%, #1e3a8a 50%, #0f172a 100%);
+  background-size: 140% 130%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  color: #ffffff;
   }
 }
 
