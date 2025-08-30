@@ -178,14 +178,23 @@ export async function POST(request: NextRequest) {
         usageInfo = await getUsageInfo(sessionId)
       }
 
+      // Check if AI response mentions any life events and provide relevant services
+      const possibleIntents = detectPossibleIntents(aiResponse || message)
+      if (possibleIntents.length > 0) {
+        // Combine services from all detected intents
+        relevantServices = possibleIntents.flatMap(intent => 
+          services[intent as keyof typeof services] || []
+        )
+      }
+
       // Use AI response if available, otherwise fallback
       response = aiResponse || "I'm here to help with government services for major life events. Try telling me about job loss, having a baby, natural disasters, or becoming a carer. For other questions, I'll do my best to assist you."
 
       return NextResponse.json({
-        intent: null,
+        intent: possibleIntents.length > 0 ? possibleIntents[0] : null,
         response,
-        services: [],
-        confidence: 0.1,
+        services: relevantServices,
+        confidence: possibleIntents.length > 0 ? 0.7 : 0.1,
         mode,
         aiEnhanced,
         usageInfo
@@ -258,6 +267,39 @@ function detectIntent(message: string): string | null {
   }
   
   return null
+}
+
+function detectPossibleIntents(text: string): string[] {
+  const intents: string[] = []
+  const lowerText = text.toLowerCase()
+  
+  // Check for job loss keywords
+  if (lowerText.includes('job') || lowerText.includes('work') || lowerText.includes('employ') || 
+      lowerText.includes('unemploy') || lowerText.includes('redundan') || lowerText.includes('fired')) {
+    intents.push('job_loss')
+  }
+  
+  // Check for birth keywords
+  if (lowerText.includes('baby') || lowerText.includes('birth') || lowerText.includes('child') ||
+      lowerText.includes('pregnan') || lowerText.includes('expecting') || lowerText.includes('newborn') ||
+      lowerText.includes('maternal') || lowerText.includes('paternal')) {
+    intents.push('birth')
+  }
+  
+  // Check for disaster keywords
+  if (lowerText.includes('disaster') || lowerText.includes('flood') || lowerText.includes('fire') ||
+      lowerText.includes('storm') || lowerText.includes('cyclone') || lowerText.includes('earthquake') ||
+      lowerText.includes('bushfire') || lowerText.includes('emergency') || lowerText.includes('damage')) {
+    intents.push('disaster')
+  }
+  
+  // Check for carer keywords
+  if (lowerText.includes('carer') || lowerText.includes('caring') || lowerText.includes('care for') ||
+      lowerText.includes('look after') || lowerText.includes('disability') || lowerText.includes('elderly')) {
+    intents.push('carer')
+  }
+  
+  return intents
 }
 
 function generateResponse(intent: string, services: any[]): string {
@@ -340,10 +382,13 @@ async function getBasicAIResponse(message: string): Promise<string> {
 The user has asked: "${message}"
 
 Please provide a helpful response that:
-1. Acknowledges their question
-2. Provides relevant information if it's related to Australian government services
-3. Guides them toward the specific life events you can help with (job loss, having a baby, natural disasters, or becoming a carer)
-4. Keeps the response appropriate and family-friendly
+1. Acknowledges their question with empathy
+2. If related to Australian government services, provide relevant information
+3. If the question relates to job loss, having a baby, natural disasters, or becoming a carer, mention that specific services are available
+4. Guide them toward the specific life events you can help with (job loss, having a baby, natural disasters, or becoming a carer)
+5. Keep the response appropriate and family-friendly
+
+If their question touches on any of these life events, briefly mention that relevant government services and support are available, and they can explore the Service Information panel for details.
 
 Keep your response concise (max 150 words), compassionate, and at a Grade 6 reading level.
 
@@ -369,8 +414,11 @@ Please provide a comprehensive and helpful response that:
 1. Acknowledges their question with empathy
 2. Provides relevant information if it's related to Australian government services
 3. If it's not about government services, still be helpful but guide them toward the specific life events you specialize in (job loss, having a baby, natural disasters, or becoming a carer)
-4. Maintains appropriate, family-friendly content
-5. Offers to help with their specific government service needs
+4. If the question relates to any of these life events, mention that specific government services and detailed information are available
+5. Maintains appropriate, family-friendly content
+6. Offers to help with their specific government service needs
+
+If their question touches on job loss, having a baby, natural disasters, or becoming a carer, mention that they can check the Service Information panel for detailed government services, eligibility requirements, and contact information.
 
 Keep your response conversational, compassionate, and at a Grade 6 reading level. Be thorough but easy to understand.
 
