@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 interface VoiceInputProps {
   onTranscriptComplete: (transcript: string) => void;
+  onTranscriptUpdate?: (transcript: string) => void;
 }
 
-const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscriptComplete }) => {
+const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscriptComplete, onTranscriptUpdate }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [recognition, setRecognition] = useState<any>(null);
@@ -20,6 +21,8 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscriptComplete }) => {
         const current = event.resultIndex;
         const transcriptText = event.results[current][0].transcript;
         setTranscript(transcriptText);
+        // Call live update callback if provided
+        onTranscriptUpdate?.(transcriptText);
       };
 
       recognition.onend = () => {
@@ -42,12 +45,12 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscriptComplete }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="relative">
       <button
         onClick={toggleListening}
         className={`rounded-full p-3 transition-all ${
           isListening 
-            ? 'bg-red-500 hover:bg-red-600' 
+            ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
             : 'bg-blue-500 hover:bg-blue-600'
         }`}
         aria-label={isListening ? 'Stop recording' : 'Start recording'}
@@ -78,11 +81,15 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscriptComplete }) => {
       
       {isListening && (
         <div 
-          className="p-4 rounded-lg bg-gray-100 w-full max-w-sm"
+          className="absolute bottom-full right-0 mb-2 p-3 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-lg min-w-48 max-w-64 z-10"
           role="status"
           aria-live="polite"
         >
-          <p className="text-sm">{transcript || 'Listening...'}</p>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Recording...</div>
+          <p className="text-sm text-gray-800 dark:text-gray-200 break-words">
+            {transcript || 'Speak now...'}
+          </p>
+          <div className="absolute bottom-[-8px] right-4 w-4 h-4 bg-white dark:bg-gray-700 border-r border-b border-gray-200 dark:border-gray-600 transform rotate-45"></div>
         </div>
       )}
     </div>
