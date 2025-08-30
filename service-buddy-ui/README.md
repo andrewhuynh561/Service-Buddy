@@ -36,6 +36,48 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
 - **Encryption**: Client-side XOR encryption for API keys
 
 ## Getting Started
+## Required Packages & Installation
+
+The following npm packages are required for Service-Buddy UI:
+
+- next
+- react
+- react-dom
+- typescript
+- @types/node
+- @types/react
+- @types/react-dom
+- tailwindcss
+- postcss
+- autoprefixer
+- eslint
+- eslint-config-next
+- @google/generative-ai
+
+### Install All Packages
+
+Navigate to the `service-buddy-ui` directory and run:
+
+```powershell
+Set-Location "service-buddy-ui"
+npm install next react react-dom typescript @types/node @types/react @types/react-dom tailwindcss postcss autoprefixer eslint eslint-config-next @google/generative-ai
+```
+
+Or simply run:
+
+```powershell
+npm install
+```
+
+This will install all dependencies listed in `package.json`.
+
+### Gemini Package Only
+
+To install only the Gemini package:
+
+```powershell
+npm install @google/generative-ai
+```
 
 ### Prerequisites
 
@@ -44,8 +86,9 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
 
 ### Installation
 
-1. **Install dependencies**:
-   ```bash
+1. **Navigate to the UI folder and install dependencies**:
+   ```powershell
+   Set-Location "service-buddy-ui"
    npm install
    ```
 
@@ -62,7 +105,8 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
    Get your key from: [Google AI Studio](https://ai.google.dev/)
 
 3. **Run the development server**:
-   ```bash
+   ```powershell
+   Set-Location "service-buddy-ui"
    npm run dev
    ```
 
@@ -71,7 +115,8 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
 
 ### Build for Production
 
-```bash
+```powershell
+Set-Location "service-buddy-ui"
 npm run build
 npm start
 ```
@@ -80,7 +125,7 @@ npm start
 
 ```
 service-buddy-ui/
-├── app/                    # Next.js App Router
+├── app/                   # Next.js App Router
 │   ├── api/               # API routes (lightweight backend)
 │   │   └── chat/          # Chat API endpoint
 │   ├── layout.tsx         # Root layout
