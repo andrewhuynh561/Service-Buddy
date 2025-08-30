@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import TypewriterText from './TypewriterText'
+import SettingsModal from './SettingsModal'
 
 interface Message {
   id: string
@@ -152,6 +153,11 @@ What can I help you with today?`,
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [selectedServices, setSelectedServices] = useState<Service[]>([])
+  const [showSettings, setShowSettings] = useState(false)
+  const [mode, setMode] = useState<'basic' | 'advanced'>('basic')
+  const [userApiKey, setUserApiKey] = useState('')
+  const [sessionId] = useState(() => Math.random().toString(36).substring(7))
+  const [usageInfo, setUsageInfo] = useState<{remaining: number, limit: number, used: number} | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -233,7 +239,7 @@ What can I help you with today?`,
     setIsTyping(true)
 
     try {
-      // Call the API endpoint
+      // Call the enhanced API endpoint
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -241,7 +247,9 @@ What can I help you with today?`,
         },
         body: JSON.stringify({ 
           message: messageToProcess,
-          useAI: false // Set to true if you want to use OpenAI
+          mode,
+          userApiKey: mode === 'advanced' ? userApiKey : undefined,
+          sessionId
         }),
       })
 
@@ -251,15 +259,25 @@ What can I help you with today?`,
 
       const data = await response.json()
       
+      let botContent = data.response
+      if (data.aiEnhanced) {
+        botContent += '\n\n✨ *Enhanced by AI*'
+      }
+      
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: botContent,
         sender: 'bot',
         timestamp: new Date()
       }
       
       setMessages(prev => [...prev, botMessage])
       setSelectedServices(data.services || [])
+      
+      // Update usage info for basic mode
+      if (data.usageInfo) {
+        setUsageInfo(data.usageInfo)
+      }
       
     } catch (error) {
       console.error('Error calling chat API:', error)
@@ -273,7 +291,7 @@ What can I help you with today?`,
           const response = generateResponse(intent, services)
           const botMessage: Message = {
             id: (Date.now() + 1).toString(),
-            content: response,
+            content: response + '\n\n⚠️ *Using offline mode*',
             sender: 'bot',
             timestamp: new Date()
           }
@@ -287,6 +305,7 @@ What can I help you with today?`,
 • "I lost my job" or "I'm unemployed"
 • "We had a baby" or "I'm expecting"  
 • "We were affected by floods/fires" or "Natural disaster"
+• "I need to become a carer"
 
 What situation can I help you with?`
         
@@ -316,10 +335,106 @@ What situation can I help you with?`
     setInputValue(text)
   }
 
+  const fillAndSend = async (text: string) => {
+    setInputValue(text)
+    // Wait for state to update, then send
+    setTimeout(async () => {
+      if (!isTyping) {
+        const trimmedMessage = text.trim()
+        if (trimmedMessage) {
+          setIsTyping(true)
+          setInputValue('')
+          
+          const userMessage: Message = {
+            id: Date.now().toString(),
+            content: trimmedMessage,
+            sender: 'user',
+            timestamp: new Date()
+          }
+          
+          setMessages(prev => [...prev, userMessage])
+          
+          try {
+            const response = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: trimmedMessage,
+                mode,
+                userApiKey: mode === 'advanced' ? userApiKey : undefined,
+                sessionId
+              }),
+            })
+            
+            const data = await response.json()
+            
+            if (data.usageInfo) {
+              setUsageInfo(data.usageInfo)
+            }
+            
+            const botMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: data.response || 'Sorry, I encountered an error. Please try again.',
+              sender: 'bot',
+              timestamp: new Date()
+            }
+            
+            setMessages(prev => [...prev, botMessage])
+            setSelectedServices(data.services || [])
+          } catch (error) {
+            console.error('Chat error:', error)
+            const errorMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: 'Sorry, I encountered an error. Please try again.',
+              sender: 'bot',
+              timestamp: new Date()
+            }
+            setMessages(prev => [...prev, errorMessage])
+          } finally {
+            setIsTyping(false)
+          }
+        }
+      }
+    }, 100)
+  }
+
+  const handleModeChange = (newMode: 'basic' | 'advanced', apiKey?: string) => {
+    setMode(newMode)
+    if (newMode === 'advanced' && apiKey) {
+      setUserApiKey(apiKey)
+    } else if (newMode === 'basic') {
+      setUserApiKey('')
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full">
       {/* Chat Area */}
       <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg flex flex-col overflow-hidden">
+        {/* Chat Header with Settings */}
+        <div className="border-b border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              mode === 'basic' 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-purple-100 text-purple-700'
+            }`}>
+              {mode === 'basic' ? '🆓 Basic Mode' : '🚀 Advanced Mode'}
+            </div>
+            {mode === 'basic' && usageInfo && (
+              <div className="text-xs text-gray-600">
+                {usageInfo.remaining}/{usageInfo.limit} AI responses left today
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            ⚙️ Settings
+          </button>
+        </div>
+
         {/* Messages */}
         <div className="flex-1 p-5 overflow-y-auto max-h-96 lg:max-h-[500px]">
           {messages.map((message) => (
@@ -430,20 +545,20 @@ What situation can I help you with?`
               <div className="mt-8 space-y-3">
                 <p className="font-medium text-gray-700 text-sm">Try these examples:</p>
                 <div className="space-y-2">
-                  <button 
-                    onClick={() => fillExample('I lost my job and need help with payments')}
+                  <button
+                    onClick={() => fillAndSend('I lost my job and need help with payments')}
                     className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
                   >
                     "I lost my job and need help with payments"
                   </button>
-                  <button 
-                    onClick={() => fillExample('We just had a baby')}
+                  <button
+                    onClick={() => fillAndSend('We just had a baby')}
                     className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
                   >
                     "We just had a baby"
                   </button>
-                  <button 
-                    onClick={() => fillExample('I lost my home due to natural disaster')}
+                  <button
+                    onClick={() => fillAndSend('I lost my home due to natural disaster')}
                     className="w-full p-3 text-left bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
                   >
                     "I lost my home due to natural disaster"
@@ -454,6 +569,15 @@ What situation can I help you with?`
           )}
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        currentMode={mode}
+        onModeChange={handleModeChange}
+        usageInfo={usageInfo || undefined}
+      />
     </div>
   )
 }

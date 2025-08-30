@@ -5,7 +5,7 @@
 **Project Name:** Service-Buddy
 
 **Summary:**
-Service-Buddy is an AI-powered agent designed to help Australians navigate government services during stressful life events (e.g., job loss, birth of a child, natural disaster). The agent provides service recommendations, eligibility explanations, checklists, simulated forms, reminders, and escalation to human help. The MVP focuses on three life events and is tailored for South Australia, but works nationally with federal services. Channels include web chat, voice playback, and SMS reminders.
+Service-Buddy is an AI-powered agent designed to help Australians navigate government services during stressful life events (e.g., job loss, birth of a child, natural disaster). The agent is powered exclusively by Google Gemini Flash and offers both Basic mode (limited daily usage using our API) and Advanced mode (unlimited with user's API key). The agent provides service recommendations, eligibility explanations, checklists, simulated forms, reminders, and escalation to human help. The MVP focuses on three life events and is tailored for South Australia, but works nationally with federal services.
 
 **Repository Size:** Small to medium (PRD + Next.js application).
 
@@ -34,9 +34,9 @@ Service-Buddy is an AI-powered agent designed to help Australians navigate gover
    npm install
    ```
 
-3. **Environment setup** (optional for basic functionality):
+3. **Environment setup** (recommended for full AI functionality):
    - Copy `.env.local` for environment variables
-   - Add `OPENAI_API_KEY=your_key_here` for enhanced AI responses (optional)
+   - Add `GOOGLE_GEMINI_API_KEY=your_key_here` for enhanced AI responses
 
 **Development Commands:**
 - **Start dev server**: `npm run dev` (runs on http://localhost:3000)
@@ -84,13 +84,16 @@ Service-Buddy/
 - **Styling**: Tailwind CSS with custom gradient themes
 - **Backend**: Lightweight API routes in `/app/api/`
 - **State Management**: React hooks (useState, useRef, useEffect)
-- **AI Integration**: Optional OpenAI API via `/api/chat` endpoint
+- **AI Integration**: Google Gemini Flast (exclusive AI provider)
 
 **API Endpoints:**
-- `POST /api/chat`: Processes user messages, returns service recommendations
+- `POST /api/chat`: Processes user messages, returns service recommendations (Gemini-powered)
+- `GET /api/usage`: Returns current usage statistics for basic mode limits
 - Mock data for 3 life events: job_loss, birth, disaster
 - Intent detection via keyword matching
-- Fallback to local processing if API fails
+- Basic mode: 10 daily AI responses using our Google Gemini Flash API
+- Advanced mode: Unlimited responses using user's Google Gemini API key
+- Graceful fallback to local processing if API fails
 
 **Configuration Files:**
 - `next.config.js`: Next.js configuration
@@ -142,11 +145,12 @@ Service-Buddy/
 - TypeScript compilation works with minor warnings (expected)
 
 **Next Development Steps:**
-- Add more sophisticated AI integration (OpenAI API)
-- Implement checklist generation functionality
-- Add SMS/notification features
+- Enhance Google Gemini integration with multimodal capabilities
+- Implement voice TTS playback functionality
+- Add SMS/notification features for reminders
 - Integrate with real government service APIs
 - Add accessibility features (WCAG 2.2 AA compliance)
+- Implement multilingual support
 
 **Critical Reminder:**
 Always run commands from the `service-buddy-ui/` directory, not the root!

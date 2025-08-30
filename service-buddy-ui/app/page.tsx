@@ -7,7 +7,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-8 text-white">
           <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
-            Service-Buddy
+            Service Buddy
           </h1>
           <p className="text-lg md:text-xl opacity-90 font-light max-w-2xl mx-auto">
             From crisis to care — one AI agent that helps you navigate government services

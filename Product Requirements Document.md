@@ -140,7 +140,9 @@ Client (Web/Mobile)
 
 Backend (API Gateway)
   ├─ Orchestrator (LLM + policy guardrails)
-  ├─ A serverless proxy - tiny backend function between OpenAI and Frontend
+  ├─ Google Gemini Integration (exclusive AI provider)
+  ├─ Usage Tracking & Limits (basic mode daily caps)
+  ├─ API Key Management (client-side encryption)
   ├─ Localization Service (i18n + glossary)
   ├─ Notifications (SMS/Email)
   └─ Telemetry & Audit (privacy-aware)
@@ -152,6 +154,12 @@ Data Layer
 ```
 
 **LLM pattern**: *Retrieve → Draft → Ground → Cite → Simplify (grade level) → Verify → Output.*
+
+**AI Architecture**: 
+- **Exclusive Provider**: Google Gemini Flash for all AI responses
+- **Dual Mode System**: Basic mode (limited daily usage) vs Advanced mode (unlimited with user's API key)
+- **Simplified Stack**: Single AI provider reduces complexity and improves reliability
+- **Security**: Client-side API key encryption, no permanent storage of user keys
 
 **Fairness weighting**: re-rank results using location + SEIFA decile to avoid systematically under‑surfacing services for disadvantaged areas. Allow user override.
 

@@ -4,19 +4,36 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
 
 ## Features
 
-- 💬 **Chat Interface**: Real-time conversation with AI agent
+- 💬 **Dual AI Modes**: Choose between Basic (limited) and Advanced (unlimited) AI responses
+- 🤖 **Google Gemini Integration**: Powered entirely by Google's Gemini Flash model
 - 🎯 **Intent Detection**: Automatically detects job loss, birth, or disaster situations  
 - 📋 **Service Recommendations**: Shows relevant government services with eligibility info
-- 🎨 **Modern UI**: Gradient design with glassmorphism effects
+- 🔒 **Secure API Keys**: Client-side encryption for user-provided API keys
+- 📊 **Usage Tracking**: Daily limits and progress visualization for basic mode
+- 🎨 **Modern UI**: Gradient design with glassmorphism effects and dynamic placeholders
 - 📱 **Responsive**: Works on desktop and mobile devices
 - ⚡ **Fast**: Built with Next.js App Router and TypeScript
+
+## AI Modes
+
+### 🆓 Basic Mode (Recommended)
+- **10 AI-enhanced responses per day**
+- **Powered by Google Gemini**
+- **Uses our Gemini API** - free for users
+- **Perfect for casual users**
+
+### 🚀 Advanced Mode  
+- **Unlimited AI-enhanced responses**
+- **Uses your own Google Gemini API key**
+- **Perfect for power users**
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS with custom gradients
-- **Backend**: Next.js API Routes (lightweight backend)
-- **AI Integration**: OpenAI API (optional)
+- **Styling**: Tailwind CSS with custom gradients and animations
+- **Backend**: Next.js API Routes with Google Gemini integration
+- **AI**: Google Gemini Flash API
+- **Encryption**: Client-side XOR encryption for API keys
 
 ## Getting Started
 
@@ -32,15 +49,17 @@ A Next.js application for the Service-Buddy AI agent that helps Australians navi
    npm install
    ```
 
-2. **Set up environment variables** (optional):
+2. **Set up environment variables** (recommended):
    ```bash
    cp .env.local.example .env.local
    ```
    
-   Add your OpenAI API key to `.env.local` for enhanced AI responses:
+   Add your Google Gemini API key to `.env.local` for basic mode responses:
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   
+   Get your key from: [Google AI Studio](https://ai.google.dev/)
 
 3. **Run the development server**:
    ```bash
@@ -117,7 +136,6 @@ This project uses Tailwind CSS with custom gradients defined in `tailwind.config
 
 ### Environment Variables
 
-- `OPENAI_API_KEY`: Optional OpenAI API key for enhanced responses
 - `NEXT_PUBLIC_APP_URL`: Application URL (defaults to localhost:3000)
 
 ## Deployment
