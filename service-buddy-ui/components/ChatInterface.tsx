@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import TypewriterText from './TypewriterText'
 import SettingsModal from './SettingsModal'
+import VoiceInput from './VoiceInput';
 
 interface Message {
   id: string
@@ -476,6 +477,12 @@ What situation can I help you with?`
           </div>
           
           <div className="flex gap-4 items-end">
+            {/* Add VoiceInput here */}
+            <VoiceInput 
+              onTranscriptComplete={(transcript) => {
+                setInputValue(transcript);
+              }}
+            />
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
