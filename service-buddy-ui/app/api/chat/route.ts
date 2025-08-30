@@ -353,100 +353,102 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    // Intent detection
-    const intent = detectIntent(message)
+    // Step 1: Check if this matches our prepared answers
+    const directIntent = detectIntent(message)
     let response: string
     let aiEnhanced = false
     let usageInfo = null
     let relevantServices: any[] = []
 
-    if (intent) {
-      // We have a prepared answer - use agentic response builder
-      relevantServices = services[intent as keyof typeof services] || []
-      const detectedIntents = [intent]
-      response = buildAgenticResponse(relevantServices, detectedIntents, message)
+    if (directIntent) {
+      // Tier 3: We have prepared answers - use them
+      relevantServices = services[directIntent as keyof typeof services] || []
+      response = buildAgenticResponse(relevantServices, [directIntent], message)
       
-      // Get usage info for basic mode
       if (mode === 'basic') {
         usageInfo = await getUsageInfo(sessionId)
       }
 
       return NextResponse.json({
-        intent,
+        intent: directIntent,
         response,
         services: relevantServices,
-        confidence: calculateConfidence(message, intent),
+        confidence: calculateConfidence(message, directIntent),
         mode,
-        aiEnhanced: false, // Prepared answers are not AI enhanced
-        usageInfo
-      })
-    } else {
-      // No prepared answer - use AI to help navigate
-      let aiResponse: string | null = null
-
-      // AI Enhancement based on mode for unknown queries
-      if (mode === 'advanced' && userApiKey) {
-        // Advanced mode: Use user's API key
-        try {
-          aiResponse = await getAdvancedAIResponse(message, userApiKey)
-          aiEnhanced = true
-        } catch (aiError) {
-          console.error('Advanced AI error:', aiError)
-        }
-      } else if (mode === 'basic') {
-        // Basic mode: Use our API with daily limits
-        const canUseAI = await checkBasicUsage(sessionId)
-        
-        if (canUseAI) {
-          try {
-            aiResponse = await getBasicAIResponse(message)
-            await incrementBasicUsage(sessionId)
-            aiEnhanced = true
-          } catch (aiError) {
-            console.error('Basic AI error:', aiError)
-          }
-        }
-        
-        // Get usage info for frontend
-        usageInfo = await getUsageInfo(sessionId)
-      }
-
-      // Check if AI response mentions any life events and provide relevant services
-      const possibleIntents = detectPossibleIntents(aiResponse || message)
-      if (possibleIntents.length > 0) {
-        // Combine services from all detected intents
-        relevantServices = possibleIntents.flatMap(intent => 
-          services[intent as keyof typeof services] || []
-        )
-        
-        // Use agentic response builder when services are found
-        if (relevantServices.length > 0) {
-          response = buildAgenticResponse(relevantServices, possibleIntents, message)
-        } else {
-          // Use AI response for non-service queries
-          response = aiResponse || "I'm here to help with government services for major life events. Try telling me about job loss, having a baby, natural disasters, or becoming a carer."
-        }
-      } else {
-        // Use AI response if available, otherwise fallback
-        response = aiResponse || "I'm here to help with government services for major life events. Try telling me about job loss, having a baby, natural disasters, or becoming a carer. For other questions, I'll do my best to assist you."
-      }
-
-      return NextResponse.json({
-        intent: possibleIntents.length > 0 ? possibleIntents[0] : null,
-        response,
-        services: relevantServices,
-        confidence: possibleIntents.length > 0 ? 0.7 : 0.1,
-        mode,
-        aiEnhanced,
+        aiEnhanced: false,
         usageInfo
       })
     }
 
+    // Step 2: Determine if it's government service related or general question
+    const isServiceRelated = isGovernmentServiceRelated(message)
+    
+    if (isServiceRelated) {
+      // Tier 2: Government service related but not in prepared answers - use smart service response
+      try {
+        let smartResponse: string
+        
+        if (mode === 'advanced' && userApiKey) {
+          smartResponse = await getSmartServiceResponse(message, userApiKey)
+          aiEnhanced = true
+        } else if (mode === 'basic') {
+          const canUseAI = await checkBasicUsage(sessionId)
+          if (canUseAI) {
+            smartResponse = await getSmartServiceResponse(message, process.env.GOOGLE_GEMINI_API_KEY!)
+            await incrementBasicUsage(sessionId)
+            aiEnhanced = true
+          } else {
+            smartResponse = "I'd love to help you with government services, but I've reached my daily limit for detailed responses. You can try advanced mode with your own API key, or ask about specific services like JobSeeker Payment, Medicare, or disaster recovery assistance."
+          }
+        } else {
+          smartResponse = "I can help with government services but need API access for detailed responses. Try asking about specific services like JobSeeker, Medicare, or disaster assistance."
+        }
+        
+        response = smartResponse
+        
+      } catch (error) {
+        console.error('Smart service response error:', error)
+        response = "I can help with government services like JobSeeker Payment, Medicare, Parental Leave, disaster assistance, and more. What specific service are you looking for?"
+      }
+    } else {
+      // Tier 1: Not related to government services - use general smart response
+      try {
+        let generalResponse: string
+        
+        if (mode === 'advanced' && userApiKey) {
+          generalResponse = await getGeneralSmartResponse(message, userApiKey)
+          aiEnhanced = true
+        } else if (mode === 'basic') {
+          const canUseAI = await checkBasicUsage(sessionId)
+          if (canUseAI) {
+            generalResponse = await getGeneralSmartResponse(message, process.env.GOOGLE_GEMINI_API_KEY!)
+            await incrementBasicUsage(sessionId)
+            aiEnhanced = true
+          } else {
+            generalResponse = "I'm primarily designed to help with Australian government services, but I've reached my daily limit for general conversations. You can ask me about services like JobSeeker, Medicare, or family support - or try advanced mode for unlimited responses."
+          }
+        } else {
+          generalResponse = "I'm Service-Buddy, designed to help with Australian government services. While I can chat about other things, my specialty is helping with JobSeeker, Medicare, parental leave, disaster assistance, and other government support."
+        }
+        
+        response = generalResponse
+        
+      } catch (error) {
+        console.error('General smart response error:', error)
+        response = "I'm Service-Buddy, your guide to Australian government services. I can help with JobSeeker, Medicare, family support, disaster assistance, and more. What would you like to know?"
+      }
+    }
+
+    // Get usage info for basic mode
+    if (mode === 'basic') {
+      usageInfo = await getUsageInfo(sessionId)
+    }
+
     return NextResponse.json({
-      intent,
+      intent: null,
       response,
       services: relevantServices,
-      confidence: calculateConfidence(message, intent),
+      confidence: 0.1,
       mode,
       aiEnhanced,
       usageInfo
@@ -562,69 +564,33 @@ function detectPossibleIntents(text: string): string[] {
   return intents
 }
 
-// Enhanced agentic response builder for proactive assistance
+// Natural conversational response builder
 function buildAgenticResponse(services: any[], intents: string[], message: string): string {
   if (services.length === 0) {
-    return "Let me help you find the right government services. Tell me more about your situation - are you dealing with job loss, having a baby, disability support, age pension, natural disaster, caring for someone, or healthcare needs?"
+    return "I can help you find government services for situations like job loss, having a baby, natural disasters, becoming a carer, or other life events. What would you like to know about?"
   }
 
-  let response = "**Here's what you need to do right now:**\n\n"
+  // Generate natural, conversational responses based on the situation
+  const intent = intents[0] || 'general'
   
-  // Build immediate action items
-  services.forEach((service, index) => {
-    if (service.urgentAction) {
-      response += `🚨 **URGENT**: ${service.urgentAction}\n\n`
-    }
-    
-    response += `**${index + 1}. ${service.title}**\n`
-    response += `📞 **Call immediately**: ${service.phone}\n`
-    
-    if (service.actionSteps && service.actionSteps.length > 0) {
-      response += `**Your next steps:**\n`
-      service.actionSteps.forEach((step: string, stepIndex: number) => {
-        response += `   ${stepIndex + 1}. ${step}\n`
-      })
-    }
-    
-    if (service.processingTime) {
-      response += `⏱️ **Processing time**: ${service.processingTime}\n`
-    }
-    
-    if (service.importantNote) {
-      response += `⚠️ **Important**: ${service.importantNote}\n`
-    }
-    
-    response += `🔗 **Apply here**: ${service.applyUrl}\n\n`
-  })
-  
-  // Add form assistance offer
-  if (intents.includes('form_assistance') || services.length > 0) {
-    response += "**Need help with the application?** I can guide you through each form section, explain required documents, and help you avoid common mistakes that delay processing.\n\n"
+  if (intent === 'job_loss') {
+    return "I understand losing your job is really stressful. There are several support options available, including JobSeeker Payment for income support, Rent Assistance to help with housing costs, and Workforce Australia for job search help. The main number to call is 131 202 - they have multilingual support and can help you figure out what you're eligible for. Would you like me to explain more about any of these options?"
   }
   
-  // Add location assistance
-  if (intents.includes('location_assistance')) {
-    response += "**Looking for in-person help?** Call the numbers above to find your nearest service center. **Best times to call**: 8-10am or 2-4pm to avoid peak wait times.\n\n"
+  if (intent === 'birth') {
+    return "Congratulations on your new baby! There are a few important things to sort out, like enrolling your baby in Medicare (call 132 011) and looking into Parental Leave Pay and Family Tax Benefit if you're eligible. Services Australia at 131 150 can help with the family payments. I can give you more details about any of these if you'd like?"
   }
   
-  // Proactive preparation checklist
-  response += "**Documents to gather now:**\n"
-  response += "• Birth certificate and passport or driver's license\n"
-  response += "• Bank statements (last 3 months)\n"
-  response += "• Income tax returns and payslips\n"
-  response += "• Rental agreement (if applicable)\n"
-  response += "• Medical certificates (if applicable)\n\n"
+  if (intent === 'disaster') {
+    return "I'm really sorry you've been affected by a disaster. There are emergency payments available like the Disaster Recovery Payment (one-off help) and Disaster Recovery Allowance if you can't work. The disaster helpline is 180 22 66. They can process payments quite quickly, usually within 7-14 days. Do you need help understanding what you might be eligible for?"
+  }
   
-  response += "**Set up myGov account**: If you don't have one, create it at myGov.gov.au - you'll need it for most applications.\n\n"
+  if (intent === 'carer') {
+    return "Taking on caring responsibilities is both rewarding and challenging. There's support available through Carer Payment if you can't work because of your caring role, and Carer Allowance to help with extra costs. You can call 132 717 to discuss your situation. Would you like me to explain more about the eligibility requirements?"
+  }
   
-  response += "**I'm here to help every step of the way!** Ask me about:\n"
-  response += "• Specific form questions\n"
-  response += "• What documents you need\n"
-  response += "• How to prepare for appointments\n"
-  response += "• What to expect during processing\n"
-  response += "• Backup options if applications are delayed"
-  
-  return response
+  // General fallback for other situations
+  return `I've found some services that might help with your situation. The best place to start is usually calling Services Australia at 131 202 - they can help determine what you're eligible for and guide you through the application process. Would you like me to explain more about any specific services?`
 }
 
 function generateResponse(intent: string, services: any[]): string {
@@ -702,38 +668,20 @@ async function getBasicAIResponse(message: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GEMINI_API_KEY)
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-  const prompt = `You are Service-Buddy, an expert Australian government services assistant designed to actively help users navigate and access government services during life events.
+  const prompt = `You are Service-Buddy, a helpful AI assistant that provides information about Australian government services.
 
 The user has asked: "${message}"
 
-YOUR ROLE: Be proactive, action-oriented, and practical. Don't just inform - actively guide users through the process of accessing services.
+Please provide a helpful and friendly response that:
+1. If the question is about government services (job loss, having a baby, natural disasters, becoming a carer, age pension, disability support, healthcare), provide relevant information
+2. If it's a general greeting or casual conversation, politely guide them toward how you can help with government services
+3. If it's inappropriate or toxic content, politely decline and redirect to your purpose
+4. Keep responses conversational and easy to understand
+5. Mention relevant phone numbers and websites when appropriate
 
-AGENTIC RESPONSE STYLE:
-1. **IMMEDIATE ACTION FOCUS**: Always start with "Here's what you need to do right now..." or "Let me help you get this sorted immediately..."
+For greetings like "hey", "what's up", etc., respond naturally but guide them to your main purpose.
 
-2. **STEP-BY-STEP GUIDANCE**: Provide clear, numbered action steps that users can follow immediately
-
-3. **PROACTIVE SUGGESTIONS**: Anticipate what users need next, suggest related services they might have missed
-
-4. **DIRECT LINKS & CONTACTS**: Always provide specific phone numbers, URLs, and reference numbers
-
-5. **URGENCY AWARENESS**: Highlight time-sensitive applications, deadlines, and urgent actions
-
-Please provide a response that:
-1. Acknowledges their situation with empathy and urgency
-2. Provides immediate, actionable next steps
-3. If related to job loss, birth, disability, age pension, disasters, carer situations, or healthcare - be specific about what they need to do TODAY
-4. Include specific phone numbers and deadlines where relevant
-5. Guide them to explore the Service Information panel for detailed step-by-step assistance
-6. Use action verbs: "Apply now", "Call immediately", "Gather these documents"
-
-CONVERSATION TONE:
-- Confident and reassuring: "I'll help you get this sorted"
-- Urgent when appropriate: "This needs to be done within 21 days" 
-- Practical: "Here's exactly what documents you'll need"
-- Supportive: "This process can be complex, but I'll guide you through each step"
-
-Keep your response concise (max 200 words), action-oriented, and at a Grade 6 reading level.
+Keep your response friendly, helpful, and around 100-150 words.
 
 Response:`
 
@@ -749,40 +697,99 @@ async function getAdvancedAIResponse(message: string, userApiKey: string): Promi
   const genAI = new GoogleGenerativeAI(userApiKey)
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-  const prompt = `You are Service-Buddy, an expert Australian government services assistant designed to actively help users navigate and access government services during life events.
+  const prompt = `You are Service-Buddy, a helpful AI assistant that provides information about Australian government services.
 
 The user has asked: "${message}"
 
-YOUR ROLE: Be proactive, action-oriented, and practical. Don't just inform - actively guide users through the process of accessing services. You have unlimited capabilities with the user's API key.
+Please provide a helpful response that:
+1. Answers their question if it's related to Australian government services
+2. For casual conversation or greetings, respond naturally but guide them toward government services you can help with
+3. For inappropriate content, politely decline and redirect to your purpose
+4. Keep responses conversational, friendly, and informative
+5. Include relevant contact details and websites when discussing specific services
 
-ADVANCED AGENTIC RESPONSE STYLE:
-1. **COMPREHENSIVE ACTION PLAN**: Provide detailed, step-by-step guidance with specific timelines
-2. **ANTICIPATE NEEDS**: Suggest related services, backup options, and common next steps
-3. **DETAILED PROCESS GUIDANCE**: Explain exactly how to fill out forms, what to expect in appointments
-4. **ESCALATION PATHS**: Provide options if applications are rejected or delayed
-5. **PROACTIVE FOLLOW-UP**: Suggest calendar reminders, document preparation lists
-6. **LOCATION-SPECIFIC HELP**: Mention local service centers and best times to visit/call
+Focus on being helpful and informative rather than overly directive. Provide context and options rather than demanding immediate action.
 
-Please provide a comprehensive response that:
-1. Acknowledges their situation with empathy and confidence in helping them succeed
-2. Provides immediate, actionable next steps with specific timelines
-3. If related to job loss, birth, disability, age pension, disasters, carer situations, or healthcare - provide detailed guidance
-4. Include specific phone numbers, reference numbers, and exact document requirements
-5. Anticipate potential complications and provide backup plans
-6. Guide them to explore the Service Information panel for detailed assistance
-7. Offer specific help with form completion and appointment preparation
-
-CONVERSATION TONE:
-- Expert and confident: "I'll walk you through exactly what you need to do"
-- Detailed and thorough: "Here's the complete process from start to finish"
-- Anticipatory: "You'll also want to prepare for these potential next steps"
-- Supportive: "I'm here to help you succeed with every part of this process"
-
-Provide a detailed response (up to 400 words) that gives them everything they need to take action successfully.
+Keep your response natural and conversational, around 150-250 words.
 
 Response:`
 
   const result = await model.generateContent(prompt)
   const response = await result.response
   return response.text() || "I'm here to help with government services for major life events. I can provide detailed assistance with job loss, having a baby, natural disasters, or becoming a carer. How can I help you today?"
+}
+
+// Helper function to determine if a message is government service related
+function isGovernmentServiceRelated(message: string): boolean {
+  const serviceKeywords = [
+    // General government terms
+    'government', 'service', 'centrelink', 'services australia', 'medicare', 'myGov', 'benefits', 'payment', 'support', 'assistance', 'help', 'aid', 'subsidy', 'allowance', 'pension',
+    
+    // Life events
+    'job', 'work', 'unemployed', 'employment', 'jobseeker', 'baby', 'birth', 'newborn', 'pregnant', 'maternity', 'paternity', 'parental', 'disaster', 'flood', 'fire', 'storm', 'cyclone', 'earthquake', 'bushfire', 'carer', 'caring', 'disability', 'aged care',
+    
+    // Specific services
+    'family tax', 'child care', 'childcare', 'rent assistance', 'healthcare', 'health care', 'pharmaceutical', 'pbs', 'ndis', 'aged pension', 'disability support', 'workforce australia',
+    
+    // Financial terms
+    'financial', 'money', 'income', 'tax', 'refund', 'claim', 'apply', 'eligible', 'eligibility'
+  ]
+  
+  const lowerMessage = message.toLowerCase()
+  return serviceKeywords.some(keyword => lowerMessage.includes(keyword))
+}
+
+// Smart response for government service related queries
+async function getSmartServiceResponse(message: string, apiKey: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+
+  const prompt = `You are Service-Buddy, an expert assistant for Australian government services.
+
+The user has asked: "${message}"
+
+This question is related to government services. Please provide a helpful, informative response that:
+
+1. Addresses their specific question about Australian government services
+2. Provides relevant service information, phone numbers, and websites when appropriate
+3. Explains eligibility requirements in simple terms if relevant
+4. Suggests next steps or actions they can take
+5. Mentions key contact numbers like Services Australia (131 202), Medicare (132 011), etc.
+6. Keeps the response conversational and supportive, not overwhelming
+
+Focus on being informative and helpful. If you're not sure about specific details, direct them to official sources.
+
+Keep your response natural and conversational, around 150-250 words.
+
+Response:`
+
+  const result = await model.generateContent(prompt)
+  const response = await result.response
+  return response.text() || "I can help with government services like JobSeeker Payment, Medicare, family support, disaster assistance, and more. For specific information, you can call Services Australia at 131 202. What would you like to know more about?"
+}
+
+// Smart response for general (non-government service) queries
+async function getGeneralSmartResponse(message: string, apiKey: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+
+  const prompt = `You are Service-Buddy, a friendly AI assistant whose main purpose is helping with Australian government services.
+
+The user has asked: "${message}"
+
+This question doesn't seem to be about government services. Please provide a helpful response that:
+
+1. Answers their question naturally and helpfully if appropriate
+2. Acknowledges that while you can chat about various topics, your specialty is Australian government services
+3. Gently guides the conversation toward how you can help with government services
+4. Maintains a friendly, conversational tone
+5. If it's a greeting, respond warmly and introduce your main purpose
+
+Keep your response friendly and natural, around 100-150 words.
+
+Response:`
+
+  const result = await model.generateContent(prompt)
+  const response = await result.response
+  return response.text() || "I'm Service-Buddy, your guide to Australian government services. While I can chat about various topics, I specialize in helping with JobSeeker, Medicare, family support, disaster assistance, and other government services. How can I help you today?"
 }
